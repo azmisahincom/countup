@@ -11,79 +11,20 @@
 (function () {
 
   /**
- * Number.prototype.format(n, x)
- * 
- * @param integer n: length of decimal
- * @param integer x: length of sections
- */
+   * Number.prototype.format(n, x)
+   * 
+   * @param integer n: length of decimal
+   * @param integer x: length of sections
+   */
   Number.prototype.format = function (n, x) {
     var re = '\\d(?=(\\d{' + (x || 3) + '})+' + (n > 0 ? '\\.' : '$') + ')';
     return this.toFixed(Math.max(0, ~~n)).replace(new RegExp(re, 'g'), '$&,');
   }
 
-  // Bir html elementinin sayfa üzerinde görünümü izler
-  var GorunumDinleyici = function (element, callback) {
-    this._el = element
-    this._cb = callback
-    this._at = false
-    this._hasBeenVisible = false
-    this._hasBeenInvisible = true
-    var _me = this
-
-    window.onscroll = function () {
-      var q
-      for (q in GorunumDinleyici.queue.onvisible) {
-        GorunumDinleyici.queue.onvisible[q].call()
-      }
-      for (q in GorunumDinleyici.queue.oninvisible) {
-        GorunumDinleyici.queue.oninvisible[q].call()
-      }
-    }
-
-    return {
-      onvisible: function () {
-        GorunumDinleyici.queue.onvisible.push(function () {
-          if (!_me._at && _me._hasBeenInvisible && (window.pageYOffset + window.innerHeight) > _me._el.offsetTop && window.pageYOffset < (_me._el.offsetTop + _me._el.scrollHeight)) {
-            _me._cb.call()
-            _me._at = true
-            _me._hasBeenVisible = true
-          }
-        })
-        GorunumDinleyici.queue.oninvisible.push(function () {
-          if (_me._hasBeenVisible && ((window.pageYOffset + window.innerHeight) < _me._el.offsetTop || window.pageYOffset > (_me._el.offsetTop + _me._el.scrollHeight))) {
-            _me._hasBeenInvisible = true
-            _me._hasBeenVisible = false
-            _me._at = false
-          }
-        })
-      },
-      oninvisible: function () {
-        GorunumDinleyici.queue.oninvisible.push(function () {
-          if (!_me._at && _me._hasBeenVisible && ((window.pageYOffset + window.innerHeight) < _me._el.offsetTop || window.pageYOffset > (_me._el.offsetTop + _me._el.scrollHeight))) {
-            _me._cb.call()
-            _me._at = true
-            _me._hasBeenInvisible = true
-          }
-        })
-        GorunumDinleyici.queue.onvisible.push(function () {
-          if (_me._hasBeenInvisible && (window.pageYOffset + window.innerHeight) > _me._el.offsetTop && window.pageYOffset < (_me._el.offsetTop + _me._el.scrollHeight)) {
-            _me._hasBeenVisible = true
-            _me._hasBeenInvisible = false
-            _me._at = false
-          }
-        })
-      }
-    }
-  }
-  GorunumDinleyici.queue = {
-    onvisible: [],
-    oninvisible: []
-  }
-
   // Element gorundugunde
   function gorundugunde(element, event) {
 
-    var listener = new GorunumDinleyici(element, function () {
+    var listener = new ScrollListener(element, function () {
       calistir(element)
     })
 
